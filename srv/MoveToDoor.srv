@@ -1,0 +1,7 @@
+geometry_msgs/PoseStamped doorPose
+geometry_msgs/PoseStamped optimalPose
+bool execute
+---
+bool ok
+int32 errorCode
+geometry_msgs/PoseStamped goal

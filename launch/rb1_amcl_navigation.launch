@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Argumentos -->
+    <arg name="launch_rviz" default="false"/>
+    <arg name="map_file" default="mapaLabRB1.yaml"/>
+    <arg name="prefix" default="rb1_"/>
+    <arg name="ns" default="rb1"/>
+
+    <arg name="config" default="false" />
+    <arg unless="$(arg config)" name="command_args" value="" />
+    <arg     if="$(arg config)" name="command_args" value="-d $(find door_navigation)/config/navigation_rb1.rviz" />
+
+    
+    <group ns="rb1">
+        <!-- Cargar mapa -->
+        <include file="$(find rb1_base_localization)/launch/map_server.launch">
+            <arg name="prefix" default="$(arg prefix)"/>
+            <arg name="map_file" default="$(find door_navigation)/maps/$(arg map_file)"/>
+        </include>
+
+        <!-- Cargar AMCL -->
+        <include file="$(find rb1_base_localization)/launch/amcl.launch">
+            <arg name="prefix" default="$(arg prefix)"/>
+        </include>
+
+        <!-- Cargar move_base -->
+        <include file="$(find rb1_base_navigation)/launch/navigation_amcl/move_base.launch">
+            <arg name="prefix" default="$(arg prefix)"/>
+        </include>
+    </group>
+
+    
+
+    <node name="$(anon rviz)" pkg="rviz" type="rviz" respawn="false"
+        args="$(arg command_args)" output="screen">
+    </node>
+
+</launch>
