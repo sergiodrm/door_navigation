@@ -4,21 +4,26 @@
     <arg name="launch_ns" default="true"/>
     <arg name="namespace" default="/rb1/"/>
     <arg name="outputscreen" default="true"/>
+    <arg name="autonav" default="true"/>
 
     <!-- Ejecutar nodo -->
     <group ns="$(arg namespace)" if="$(arg launch_ns)">
         <!-- Cargar parametros desde fichero yaml -->
         <rosparam file="$(find armcontrolmoveit)/config/door_config.yaml" command="load"/>
+	<rosparam file="$(find armcontrolmoveit)/config/move_group_config.yaml" command="load"/>
+
+        <node pkg="door_navigation" type="ServicesDoorNavigation.py" name="services_door_navigation"
+        output="screen"/>
 
         <node if="$(arg outputscreen)" pkg="door_navigation" type="doorNavigation.py" 
-        name="door_navigation_SJG" output="screen" args="$(arg namespace)"/>
+        name="door_navigation_SJG" output="screen" args="$(arg autonav) $(arg namespace)"/>
 
         <node unless="$(arg outputscreen)" pkg="door_navigation" 
-        type="doorNavigation.py" name="door_navigation_SJG" args="$(arg namespace)"/>    
+        type="doorNavigation.py" name="door_navigation_SJG" args="$(arg autonav) $(arg namespace)"/>    
     </group>
     <group unless="$(arg launch_ns)">
         <!-- Cargar parametros desde fichero yaml -->
-        <rosparam file="$(find armcontrolmoveit)/config/door_config.yaml" command="load"/>
+        <rosparam file="$(find door_navigation)/config/door_config.yaml" command="load"/>
         <node if="$(arg outputscreen)" pkg="door_navigation" type="doorNavigation.py" name="door_navigation_SJG" output="screen"/>
         <node unless="$(arg outputscreen)" pkg="door_navigation" type="doorNavigation.py" name="door_navigation_SJG"/>
     </group>

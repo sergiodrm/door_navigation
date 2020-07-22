@@ -47,6 +47,17 @@ def loadParameter(name, defaultValue):
         print("Parametro " + name+ " no especificado, valor por defecto: " + str(defaultValue))
         return defaultValue
 
+def abs(value):
+    if value < 0:
+        return -value
+    return value
+
+def module(value):
+    return np.sqrt(value[0]**2 + value[1]**2 + value[2]**2)
+
+# def module(x, y, z):
+#     return np.sqrt(x**2 + y**2 + z**2)
+
 def MoveToDoorServer(request):
     ############################################################################
     ## MoveToDoorService
@@ -54,7 +65,10 @@ def MoveToDoorServer(request):
     ## respecto del sistema del robot (/rb1_base_footprint).
     ## Una vez calculado se envia a /move_base para ejecute la navegacion.
     ############################################################################
-    print('Ejecutando servicio /move_to_door')
+    print('Running move_to_door service!')
+    rate = rospy.Rate(1.0)
+    pub = rospy.Publisher('/rb1/move_base_simple/goal', geometry_msgs.msg.PoseStamped, queue_size=10)
+    rate.sleep()
     ## Inicializacion de la response del service
     response = MoveToDoorResponse()
     response.errorCode = ErrorCode.SUCCESS
@@ -77,8 +91,6 @@ def MoveToDoorServer(request):
         [request.optimalPose.pose.orientation.x, request.optimalPose.pose.orientation.y,
          request.optimalPose.pose.orientation.z, request.optimalPose.pose.orientation.w]
     )
-    print('Optimal pose')
-    printPose(request.optimalPose)
 
     ## Multiplicar las matrices para obtener la posicion optima desde el rb1_map
     goalMatrix = np.dot(doorMatrix, optimalPoseMatrix)
@@ -87,39 +99,37 @@ def MoveToDoorServer(request):
     goal.header.frame_id = 'rb1_map'
     goal.header.stamp = rospy.Time.now()
     goal.pose = matrix2Pose(goalMatrix)
-    printPose(goal)
 
     if request.execute:
         print('Iniciando ejecucion...')
-        pub = rospy.Publisher('/rb1/move_base_simple/goal', geometry_msgs.msg.PoseStamped, queue_size=10)
         pub.publish(goal)
+        rate.sleep()
 
     return True, 0, goal
 
 
 def main():
+    ############################################################
+    ## El nodo ServicesDoorNavigation sirve para inicializar 
+    ## el servidio de move_to_door para calcular y ejecutar el
+    ## acercamiento a la puerta y crear un topico que indique 
+    ## cuando ha terminado la fase de navegacion a la puerta
+    ############################################################
+
     ## Inicializar nodo
     rospy.init_node('door_service_navigation_node')
     rospy.loginfo('Nodo /door_service_navigation_node iniciado')
 
     ## Frecuencia del nodo
-    rate = rospy.Rate(1.0)
+    rate = rospy.Rate(10)
 
     ## Inicializar el servicio de navegacion
     service = rospy.Service('move_to_door', MoveToDoor, MoveToDoorServer)
     print('Service /move_to_door ready!')
-    # listener = tf.TransformListener()
-    # while not rospy.is_shutdown():
-    #    try:
-    #        (trans, rot) = listener.lookupTransform('rb1_base_footprint', 'rb1_map', rospy.Time(0))
-    #        print(str(trans))
-    #        print(str(rot))
-    #    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-    #        print('Error')
-    #        continue
-    #
-    #    rate.sleep()
+
     rospy.spin()
+
+    print('*** Fin del nodo ServicesDoorNavigation ***')
 
 
 if __name__ == '__main__':
