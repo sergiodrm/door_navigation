@@ -2,7 +2,7 @@
 <launch>
     <!-- Argumentos de entrada -->
     <arg name="launch_ns" default="true"/>
-    <arg name="namespace" default="/rb1/"/>
+    <arg name="namespace" default="/rb1"/>
     <arg name="outputscreen" default="true"/>
     <arg name="autonav" default="true"/>
 

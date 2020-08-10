@@ -21,7 +21,7 @@ door:
     largo: 0.09
     profundo: 0.05
     ancho: 0.77
-running_door_navigation: true
+running_nav: true
 rviz:
   #referenceFrame: /j2s7s300_link_base ## Para simulaciones con j2s7s300
   referenceFrame: /rb1_base_footprint ## Para RB-1
